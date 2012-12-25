@@ -63,7 +63,7 @@ function mailgun_menu() {
  */
 function mailgun_test_access() {
   return user_access('administer mailgun') &
-    (variable_get('mailgun_status', mailgun_STATUS_OFF) != mailgun_STATUS_OFF);
+    (variable_get('mailgun_status', MAIL_GUN_STATUS_OFF) != MAIL_GUN_STATUS_OFF);
 }
 
 /**
