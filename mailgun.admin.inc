@@ -25,7 +25,7 @@ function mailgun_admin_settings($form, &$form_state) {
     $form['mailgun_status'] = array(
       '#type' => 'radios',
       '#title' => t('mailgun Mail interface status'),
-      '#default_value' => variable_get('mailgun_status', mailgun_STATUS_OFF),
+      '#default_value' => variable_get('mailgun_status', MAIL_GUN_STATUS_OFF),
       '#options' => array(
         MAIL_GUN_STATUS_ON => t('On'),
         MAIL_GUN_STATUS_TEST => t('Test'),
