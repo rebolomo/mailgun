@@ -1,0 +1,137 @@
+<?php
+
+/**
+ * @file
+ * Enables Drupal to send email directly through MailChimp STS.
+ *
+ * Overriding mail handling in Drupal to make MailChimp STS the default
+ * transport layer, requires to change the mail_system variable's
+ * default value array('default-system' => 'DefaultMailSystem').
+ * This module uses array('default-system' => 'MailChimpMailGunMailSystem').
+ */
+
+define('MAIL_GUN_STATUS_ON', 'on');
+define('MAIL_GUN_STATUS_OFF', 'off');
+define('MAIL_GUN_STATUS_TEST', 'test');
+
+/**
+ * Implements hook_help().
+ */
+function mailgun_help($path, $arg) {
+  switch ($path) {
+    case 'admin/help#mailgun':
+      return t('Allow for site emails to be sent through mailgun.');
+  }
+}
+
+/**
+ * Implements hook_menu().
+ */
+function mailgun_menu() {
+  $items['admin/config/services/mailgun'] = array(
+    'title' => 'mailgun',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mailgun_admin_settings'),
+    'access arguments' => array('administer mailgun'),
+    'description' => 'Send emails through the mailgun transactional email service.',
+    'file' => 'mailgun.admin.inc',
+    'type' => MENU_NORMAL_ITEM,
+  );
+  $items['admin/config/services/mailgun/settings'] = array(
+    'title' => 'Settings',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => 0
+  );
+  $items['admin/config/services/mailgun/test'] = array(
+    'title' => 'Send test email',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mailgun_test_form'),
+    'access callback' => 'mailgun_test_access',
+    'description' => 'Send a test email using the mailgun API.',
+    'file' => 'mailgun.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 1
+  );
+
+  return $items;
+}
+
+/**
+ * Access callback for sending test email.
+ *
+ * @return bool
+ */
+function mailgun_test_access() {
+  return user_access('administer mailgun') &
+    (variable_get('mailgun_status', mailgun_STATUS_OFF) != mailgun_STATUS_OFF);
+}
+
+/**
+ * Implements hook_permission().
+ */
+function mailgun_permission() {
+  return array(
+    'administer mailgun' => array(
+      'title' => t('Administer mailgun'),
+      'description' => t('Perform administration tasks for the mailgun email service.'),
+      "restrict access" => TRUE
+    ),
+  );
+}
+
+/**
+ * Implements hook_mail().
+ */
+function mailgun_mail($key, &$message, $params) {
+  if ($key == 'mailgun-test') {
+    $message['subject'] = $params['subject'];
+    $message['body'] = $params['body'];
+    if ($params['include_attachment']) {
+      $message['attachments'][] = drupal_realpath('misc/druplicon.png');
+      $message['body'] .= '  ' . t('The Drupal icon is included as an attachment to test the attachment functionality.');
+    }
+  }
+}
+
+/**
+ * Get all available MailChimp STS tags
+ *
+ * @return array of tag objects
+ */
+/*
+function mailgun_get_tags() {
+  $ret = array();
+
+  $mailgun = mailgun_get_api_object();
+  $tags = $mailgun->tags_list();
+  if ($tags) {
+    foreach ($tags as $tag) {
+      $ret[$tag['tag_id']] = $tag;
+    }
+  }
+
+  return $ret;
+}*/
+
+/**
+ * Get a mailgun API object for communication with the mailchimp server.
+ */
+function mailgun_get_api_object() {
+  $api_key = variable_get('mailgun_api_key', '');
+  if (empty($api_key)) {
+    return FALSE;
+  }
+
+  $api = new MailGun($api_key, 60);
+
+  return $api;
+}
+
+/**
+ * Helper to return a comma delimited list of mail keys to not log content for.
+ *
+ * @return string
+ */
+function mailgun_mail_key_blacklist() {
+  return variable_get('mailgun_mail_key_blacklist', 'user_password_reset');
+}

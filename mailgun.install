@@ -1,0 +1,26 @@
+<?php
+
+
+/**
+ * Implements hook_uninstall().
+ */
+function mailgun_uninstall() {
+  // delete other variables
+  variable_del('mailgun_filter_format');
+  variable_del('mailgun_from');
+  variable_del('mailgun_status');
+  variable_del('mailgun_test_address');
+  variable_del('mailgun_test_body');
+}
+
+/**
+ * Implements hook_disable().
+ */
+function mailgun_disable() {
+  // reset to default mail system
+  //variable_set('mail_system', array('default-system' => 'DefaultMailSystem'));
+	$mail_system = variable_get('mail_system');
+	$mail_system['default-system'] = 'DefaultMailSystem';
+	variable_set('mail_system', $mail_system);
+  watchdog('mailgun', 'mailgun has been disabled.');
+}

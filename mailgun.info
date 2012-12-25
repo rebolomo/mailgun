@@ -1,0 +1,18 @@
+name = MailGun
+description = "仿照mandrill写的mailgun模块."
+core = 7.x
+package = Custom
+
+configure = admin/config/services/mailgun
+
+files[] = mailgun.module
+files[] = mailgun.admin.inc
+files[] = mailgun.mail.inc
+files[] = mailgun.class.php
+
+; Information added by drupal.org packaging script on 2012-10-09
+version = "7.x-1.2"
+core = "7.x"
+project = "mailgun"
+datestamp = "1349810817"
+
