@@ -118,11 +118,12 @@ function mailgun_get_tags() {
  */
 function mailgun_get_api_object() {
   $api_key = variable_get('mailgun_api_key', '');
-  if (empty($api_key)) {
+  $domain = variable_get('mailgun_domain', '');
+  if (empty($api_key) || empty($domain)) {
     return FALSE;
   }
 
-  $api = new MailGun($api_key, 60);
+  $api = new MailGun($api_key, $domain, 60);
 
   return $api;
 }
@@ -135,3 +136,4 @@ function mailgun_get_api_object() {
 function mailgun_mail_key_blacklist() {
   return variable_get('mailgun_mail_key_blacklist', 'user_password_reset');
 }
+

@@ -14,14 +14,22 @@
 function mailgun_admin_settings($form, &$form_state) {
   $key = variable_get('mailgun_api_key');
   $form['mailgun_api_key'] = array(
-    '#title' => t('mailgun API Key'),
+    '#title' => t('Mailgun API Key'),
     '#type' => 'textfield',
     '#description' => t('Create or grab your API key from the !link.',
       array('!link' => l('mailgun settings', 'http://www.mailgun.com/'))),
-    '#default_value' => $key
+    '#default_value' => $key,
   );
 
-  if ($key) {
+  $domain = variable_get('mailgun_domain');
+  $form['mailgun_domain'] = array(
+    '#title' => t('Mailgun Domain'),
+    '#type' => 'textfield',
+    '#description' => t('Domain for sending mail'),
+    '#default_value' => $domain,
+  );
+
+  if ($key && $domain) {
     $form['mailgun_status'] = array(
       '#type' => 'radios',
       '#title' => t('mailgun Mail interface status'),
