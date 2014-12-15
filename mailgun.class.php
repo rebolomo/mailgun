@@ -14,11 +14,11 @@ class MailGun {
 
   function __construct($api_key, $domain, $timeout = 300) {
     if (empty($api_key)) {
-      throw new mailgun_Exception('Invalid API key');
+      throw new Mailgun_Exception('Invalid API key');
     }
 
     if (empty($domain)) {
-      throw new mailgun_Exception('Invalid domain');
+      throw new Mailgun_Exception('Invalid domain');
     }
 
     try {

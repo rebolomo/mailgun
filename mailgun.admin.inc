@@ -50,18 +50,29 @@ function mailgun_admin_settings($form, &$form_state) {
       '#collapsible' => TRUE,
       '#title' => t('Email options'),
     );
+
     $form['email_options']['mailgun_from'] = array(
       '#title' => t('From address'),
       '#type' => 'textfield',
       '#description' => t('The sender email address. If this address has not been verified, messages will be queued and not sent until it is.'),
       '#default_value' => variable_get('mailgun_from', variable_get('site_mail'))
     );
+
     $form['email_options']['mailgun_from_name'] = array(
       '#type' => 'textfield',
       '#title' => t('From name'),
       '#default_value' => variable_get('mailgun_from_name', ''),
       '#description' => t('Optionally enter a from name to be used.'),
     );
+
+    $form['email_options']['mailgun_verify_from'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Only send emails with this From address'),
+      '#description' => t('If enabled, Mailgun will not send emails whose ' .
+        'From address is different than this email address.'),
+      '#default_value' => variable_get('mailgun_verify_from', FALSE),
+    );
+
 
     $formats = filter_formats();
     $options = array('' => t('-- Select --'));
@@ -179,12 +190,10 @@ function mailgun_admin_settings_submit($form, &$form_state) {
  * @return array $form
  */
 function mailgun_test_form($form, &$form_state) {
-  drupal_set_title(t('Send test email'));
-
   $form['mailgun_test_address'] = array(
     '#type' => 'textfield',
     '#title' => t('Email address to send a test email to'),
-    '#default_value' => 'rebol@126.com',//variable_get('site_mail', ''),
+    '#default_value' => variable_get('site_mail', ''),
     '#description' => t('Type in an address to have a test email sent there.'),
     '#required' => TRUE
   );

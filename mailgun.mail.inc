@@ -40,15 +40,13 @@ class MailGunMailSystem implements MailSystemInterface {
    *   TRUE if the mail was successfully accepted, otherwise FALSE.
    */
   public function mail(array $message) {
-		if (!$from = variable_get('mailgun_from', '')) {
-      drupal_set_message(t('mailgun can\'t send email. Please !link.',
-        array(
-          '!link' => l('add a verified from address',
-            'admin/config/services/mailgun'
-          )
-        )
-      ), 'error');
-      return FALSE;
+    $from = $message['from'];
+    if (variable_get('mailgun_verify_from')) {
+      if ($from != variable_get('mailgun_from', '')) {
+        watchdog('mailgun', 'Email sent from unverified address: @from',
+          array('@from' => $from));
+        return FALSE;
+      }
     }
 
     // send the email passing the message id as the tag for use in reporting
@@ -96,7 +94,7 @@ class MailGunMailSystem implements MailSystemInterface {
       /*'attachments'*/
       //'view_content_link' => $view_content
     );
-				
+
 		if (isset($message['attachments']) && !empty($message['attachments'])) {
 			$i = 1;
       foreach ($message['attachments'] as $attachment) {
@@ -109,8 +107,8 @@ class MailGunMailSystem implements MailSystemInterface {
 
 		if(isset($message['bcc_email'])) {
 			$mailgun_message['bcc'] = $message['bcc_email'];
-		}	
-		
+		}
+
     drupal_alter('mailgun_mail', $mailgun_message, $message);
 
     try {
