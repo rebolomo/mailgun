@@ -4,33 +4,36 @@ class MailGun_Exception extends Exception {
 }
 
 class MailGun {
-  //const API_VERSION = '1.0';
-  const END_POINT = 'https://api.mailgun.net/v2/yhmyt.mailgun.org';//'https://mailgunapp.com/api/';
-
   var $api;
+  var $endpoint;
 
   /**
    * Default to a 300 second timeout on server calls
    */
   var $timeout = 300;
 
-  function __construct($api_key, $timeout = 300) {
+  function __construct($api_key, $domain, $timeout = 300) {
     if (empty($api_key)) {
-      throw new mailgun_Exception('Invalid API key');
+      throw new Mailgun_Exception('Invalid API key');
     }
-    try {
-			$this->api = $api_key;
 
-      $response = $this->request('log',array(),'GET');
+    if (empty($domain)) {
+      throw new Mailgun_Exception('Invalid domain');
+    }
+
+    try {
+      $this->api = $api_key;
+      $this->endpoint = 'https://api.mailgun.net/v2/' . $domain;
+
+      $response = $this->request('log', array(), 'GET');
       if (!isset($response['total_count'])) {
         throw new MailGun_Exception('Invalid API key');
       }
 
-
       $this->timeout = $timeout;
 
     } catch (Exception $e) {
-			watchdog('mailgun', $e->getMessage());
+      watchdog('mailgun', $e->getMessage());
       throw new MailGun_Exception($e->getMessage());
     }
   }
@@ -87,8 +90,7 @@ class MailGun {
     //$api_version = self::API_VERSION;
     //$dot_output = ('json' == $output) ? '' : ".{$output}";
 
-    //$url = self::END_POINT . "{$api_version}/{$method}{$dot_output}";
-		$url = self::END_POINT. "/{$method}";
+    $url = $this->endpoint . "/{$method}";
     //$params = drupal_json_encode($args);
 		//$params = drupal_http_build_query($args);
 		$boundary = 'A0sFSD';
@@ -140,7 +142,7 @@ class MailGun {
     }
     else {
       $message = isset($body['message']) ? $body['message'] : '';
-      throw new MailGun_Exception($message . ' - ' . $body, $response_code);
+      throw new MailGun_Exception("Receiving $response_code for url $url: $message - $body");
     }
   }
 

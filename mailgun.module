@@ -29,7 +29,7 @@ function mailgun_help($path, $arg) {
  */
 function mailgun_menu() {
   $items['admin/config/services/mailgun'] = array(
-    'title' => 'mailgun',
+    'title' => 'Mailgun',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mailgun_admin_settings'),
     'access arguments' => array('administer mailgun'),
@@ -37,11 +37,13 @@ function mailgun_menu() {
     'file' => 'mailgun.admin.inc',
     'type' => MENU_NORMAL_ITEM,
   );
+
   $items['admin/config/services/mailgun/settings'] = array(
     'title' => 'Settings',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => 0
   );
+
   $items['admin/config/services/mailgun/test'] = array(
     'title' => 'Send test email',
     'page callback' => 'drupal_get_form',
@@ -118,11 +120,12 @@ function mailgun_get_tags() {
  */
 function mailgun_get_api_object() {
   $api_key = variable_get('mailgun_api_key', '');
-  if (empty($api_key)) {
+  $domain = variable_get('mailgun_domain', '');
+  if (empty($api_key) || empty($domain)) {
     return FALSE;
   }
 
-  $api = new MailGun($api_key, 60);
+  $api = new MailGun($api_key, $domain, 60);
 
   return $api;
 }
@@ -135,3 +138,4 @@ function mailgun_get_api_object() {
 function mailgun_mail_key_blacklist() {
   return variable_get('mailgun_mail_key_blacklist', 'user_password_reset');
 }
+
